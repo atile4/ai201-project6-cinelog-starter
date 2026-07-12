@@ -2,6 +2,13 @@
 
 ## AI Usage
 <!-- Fill in at the end — how you used AI tools during this project -->
+I used AI to quickly let me run through program files to build my understanding of the app and its processes. 
+
+Specifically, for comment 3 I used AI to help create a test and verified that it was structured properly side by side with existing tests. 
+
+More significantly, I used AI to help guide me through the rebase process. It gave me the commands to run to check what was wrong, like `git show 594e6ed:models.py | Select-String -Pattern "class WatchlistEntry" -Context 0,20`, which helped me isolate the problem that `models.py` was overridden during the rebase.
+
+
 
 ## Comment 1 — Rename
 **What I did:** Rename `save_to_watchlist()` to `add_to_watchlist()`
@@ -40,3 +47,39 @@ Here, I chose to leave the unique-constraint decision app level, via `AlreadyInW
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
+## What this PR does
+
+Adds a watchlist feature to CineLog, allowing users to save films they intend to watch (separate from their collection of films already watched). Includes:
+
+- `add_to_watchlist(user_id, film_id)` — adds a film to a user's watchlist, with deduplication (raises `AlreadyInWatchlistError` if the film is already on the user's watchlist) and validation that the film exists (raises `FilmNotFoundError` otherwise)
+- `get_watchlist(user_id)` — returns a user's watchlist, sorted by date added (most recent first)
+- A `WatchlistEntry` model, using UUID `film_id`/`user_id` to match the rest of the post-refactor schema
+- Test coverage for the nonexistent-film error case, modeled on the existing collection test suite
+
+## Design decisions
+
+**Default visibility (`public=True`):** Watchlist entries default to public. Since CineLog is a social/community film-tracking app, defaulting to private would mean most users — who typically don't change default settings — would never enable sharing, effectively killing the feature's social purpose. The tradeoff: users who don't think about privacy settings may unintentionally broadcast films they'd rather keep private. See `pr-response.md` (Comment 4) for full reasoning.
+
+**Sort order (date added, descending):** `get_watchlist()` sorts by `date_added` descending rather than alphabetically by title, since most users open their watchlist to decide what to watch next, and recency is more useful for that than alphabetical order. Alphabetical sorting is better suited to locating a specific remembered title in a long list, but that's a narrower use case. See `pr-response.md` (Comment 5) for full reasoning.
+
+## Manual testing
+
+1. Start the app: `python app.py`
+2. Create a user and a film (or use existing seed data if available)
+3. Add a film to the watchlist:
+```
+curl -X POST http://127.0.0.1:5000/watchlist/<user_id>/add 
+-H "Content-Type: application/json" 
+-d '{"film_id": "<film_id>"}'
+```
+4. Confirm the entry appears:
+```
+curl http://127.0.0.1:5000/watchlist/<user_id>
+```
+5. Attempt to add the same film again — confirm it returns an `AlreadyInWatchlistError` rather than creating a duplicate entry.
+6. Attempt to add a nonexistent `film_id` — confirm it returns a `FilmNotFoundError`.
+7. Add a second film and confirm `GET /watchlist/<user_id>` returns it before the first (most recently added first).
+8. Run the automated suite: `pytest tests/ -v` — all tests should pass.
+
+
+<img width="607" height="146" alt="image" src="https://github.com/user-attachments/assets/0db134e3-3978-448b-aedf-4f7e354b33e8" />
