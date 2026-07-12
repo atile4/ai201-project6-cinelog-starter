@@ -24,9 +24,9 @@
 **Tradeoff acknowledged:** There may be many users who don't think about privacy settings, and may end up broadcasting/sharing their watchlist by default, which could include movies they don't want others to know they watch.
 
 ## Comment 5 — Sort order
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** I agree, watchlists should default to "date added" order.
+**Reasoning:** The order that a film was added is more important than its alphabetical positioning, because the recency allows users to prioritize which films to watch first. In addition, films that have stayed in a watchlist for longer periods of time may no longer have caught the interest of the user, and could be an incentive for removal.
+**Engagement with reviewer's point:** There may be users that use watchlists purely to build a list of movies to watch. Ordering by title would be more organized and efficient for finding a specific film in a long list. That said, this is a narrower use case than deciding what to watch next, which is what most users are doing when they open their watchlist — so I'm implementing the date-added default as proposed.
 
 ## Comment 6 — Rebase
 **What conflicted:**
