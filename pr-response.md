@@ -13,8 +13,10 @@
 
 
 ## Comment 3 — Missing test
-**What I did:**
-**How I verified:**
+**What I did:** Created `tests/test_watchlist.py` and added `test_add_to_watchlist_nonexistent_film_raises`, modeled directly on `test_add_to_collection_nonexistent_film_raises` in `tests/test_collection.py`. The test asserts that calling `add_to_watchlist()` with a nonexistent `film_id` raises `FilmNotFoundError` (imported from `services.collection_service`, the same shared error class `watchlist_service.py` already uses for that check) rather than surfacing a raw database integrity error.
+
+**How I verified:** First hit a `fixture 'app' not found` error, which surfaced that fixtures weren't shared across test files. After adding local `app` and `sample_user` fixtures to `test_watchlist.py`, ran `pytest tests/test_watchlist.py -v` to confirm the new test passes, then ran `pytest tests/ -v` to confirm `test_collection.py` and the full suite still pass with no regressions.
+
 
 ## Comment 4 — Default visibility
 **My position:**
