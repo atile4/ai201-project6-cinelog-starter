@@ -19,9 +19,9 @@
 
 
 ## Comment 4 — Default visibility
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** The default visibility for user lists should be set to public.
+**Reasoning:** Because this app is a community film tracking/social app, the ability to socialize and share should be the default. Because many users usually don't touch default settings, if we set watchlist visibilty to private by default, most users wouldn't share their watchlists, which is the point of the app.
+**Tradeoff acknowledged:** There may be many users who don't think about privacy settings, and may end up broadcasting/sharing their watchlist by default, which could include movies they don't want others to know they watch.
 
 ## Comment 5 — Sort order
 **My position:**
