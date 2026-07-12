@@ -29,9 +29,14 @@
 **Engagement with reviewer's point:** There may be users that use watchlists purely to build a list of movies to watch. Ordering by title would be more organized and efficient for finding a specific film in a long list. That said, this is a narrower use case than deciding what to watch next, which is what most users are doing when they open their watchlist — so I'm implementing the date-added default as proposed.
 
 ## Comment 6 — Rebase
-**What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+**What conflicted:** I ran `git fetch origin` and `git rebase origin/main` to rebase `feature/watchlist` on top of the merged UUID refactor (`07ca580: refactor: migrate film IDs from integer to UUID`). The rebase completed without prompting for a manual conflict resolution — but this masked a real problem rather than indicating a clean rebase. My commit that originally added the `WatchlistEntry` model (`77d8958`) had been written against the pre-refactor version of `models.py`. When replayed on top of `origin/main`'s already-refactored `models.py`, git's merge algorithm didn't recognize my model addition as conflicting with the surrounding UUID changes and silently dropped it instead of applying it or flagging a conflict.
+
+**How I resolved it:** I used `git reflog` to find the commit hash my branch pointed to immediately before the rebase started (`594e6ed`), then ran `git show 594e6ed:models.py` to recover the original `WatchlistEntry` class definition as it existed pre-rebase. Rather than reapplying that old definition as-is, I manually adapted it to match the post-refactor convention already established by `CollectionEntry`: changing `film_id` from `db.Integer` to `db.String(36)` (matching `Film.id`'s UUID type) and re-adding the class to the current `models.py`. I also updated `add_to_watchlist()`'s docstring, which still described `film_id` as `(int)` with a `pre-refactor` note, and updated my Comment 3 test's fake ID from an integer (`999999`) to a UUID-shaped string, matching the pattern already used in `test_add_to_collection_nonexistent_film_raises`.
+
+Here, I chose to leave the unique-constraint decision app level, via `AlreadyInWatchlistError`. Doing so keeps migrations simpler and handling errors would be more flexible as opposed to SQLAlchemy raising a generic `IntegrityError`. 
+
+**How I verified no conflict remains:** Ran `pytest tests/ -v` for the full suite after the model fix and confirmed all tests pass, including the previously-broken `test_watchlist.py`. Ran `git grep -n "film_id" -- routes/ services/` to check for any other lingering integer-`film_id` assumptions elsewhere in the codebase (e.g. manual type coercion in route handlers). Confirmed via `git log --oneline --graph` that the branch history contains no merge commits — only a linear sequence of rebased commits on top of `origin/main`.
+
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
